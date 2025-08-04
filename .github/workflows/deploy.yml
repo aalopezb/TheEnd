@@ -1,0 +1,45 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          # Navega o crea carpeta
+          mkdir -p ~/reservas
+          cd ~/reservas
+
+          # Limpia y actualiza archivos
+          rm -rf *
+          exit
+        EOF
+
+    - name: Upload files to EC2
+      run: |
+        rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa" ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/reservas
+
+    - name: Run container on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          cd ~/reservas
+          docker build -t reservas .
+          docker stop reservas || true && docker rm reservas || true
+          docker run -d --name reservas -p 3030:3030 reservas
+        EOF
