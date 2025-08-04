@@ -1,0 +1,12 @@
+{
+  "name": "reservas",
+  "version": "1.0.0",
+  "description": "Microservicio de reservas básico en Node.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
