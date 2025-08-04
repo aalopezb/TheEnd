@@ -1,4 +1,4 @@
-name: Deploy Reservas EC2 1.4
+name: Deploy Reservas EC2 1.5
 
 on:
   push:
@@ -12,24 +12,23 @@ jobs:
     - name: Checkout repositorio
       uses: actions/checkout@v3
 
-    - name: Subir archivos por SCP
+    - name: Subir archivos por SCP a EC2
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
-        source: "."              
-        target: "~/reservas"     
+        source: "."                
+        target: "~/microservicios" 
 
-    - name: Ejecutar comandos vía SSH
+    - name: Ejecutar comandos en EC2 vía SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          cd ~/reservas
-          ls -l            
+          cd ~/microservicios/reservas
           docker build -t reservas .
           docker stop reservas || true
           docker rm reservas || true
