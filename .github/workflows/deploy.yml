@@ -1,4 +1,4 @@
-name: Deploy Reservas EC2 1.5
+name: Deploy Reservas EC2 1.6
 
 on:
   push:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repositorio
+    - name: Checkout repo
       uses: actions/checkout@v3
 
     - name: Subir archivos por SCP a EC2
@@ -18,8 +18,8 @@ jobs:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
-        source: "."                
-        target: "~/microservicios" 
+        source: "."          
+        target: "~/reservas" 
 
     - name: Ejecutar comandos en EC2 vía SSH
       uses: appleboy/ssh-action@v1.0.3
@@ -28,7 +28,7 @@ jobs:
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_KEY }}
         script: |
-          cd ~/microservicios/reservas
+          cd ~/reservas/microservicios/reservas
           docker build -t reservas .
           docker stop reservas || true
           docker rm reservas || true
